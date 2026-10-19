@@ -30,6 +30,9 @@
  */
 #define RTOS_I2S_APP_RECEIVE_FILTER_CALLBACK_ATTR __attribute__((fptrgroup("rtos_i2s_receive_filter_cb_fptr_grp")))
 
+/** Attribute for an application callback called once per I2S frame. */
+#define RTOS_I2S_APP_RESTART_CALLBACK_ATTR __attribute__((fptrgroup("rtos_i2s_restart_cb_fptr_grp")))
+
 /**
  * Typedef to the RTOS I2S driver instance struct.
  */
@@ -90,6 +93,8 @@ typedef size_t (*rtos_i2s_send_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int
  */
 typedef size_t (*rtos_i2s_receive_filter_cb_t)(rtos_i2s_t *ctx, void *app_data, int32_t *i2s_frame, size_t i2s_frame_size, int32_t *receive_buf, size_t sample_spaces_free);
 
+typedef i2s_restart_t (*rtos_i2s_restart_cb_t)(rtos_i2s_t *ctx, void *app_data);
+
 /**
  * Struct representing an RTOS I2S driver instance.
  *
@@ -120,6 +125,9 @@ struct rtos_i2s_struct{
 
     void *receive_filter_app_data;
     RTOS_I2S_APP_RECEIVE_FILTER_CALLBACK_ATTR rtos_i2s_receive_filter_cb_t receive_filter_cb;
+
+    void *restart_app_data;
+    RTOS_I2S_APP_RESTART_CALLBACK_ATTR rtos_i2s_restart_cb_t restart_cb;
 
     rtos_osal_mutex_t mutex;
     streaming_channel_t c_i2s_isr;
@@ -186,6 +194,15 @@ inline void rtos_i2s_receive_filter_cb_set(
 {
     ctx->receive_filter_app_data = receive_filter_app_data;
     ctx->receive_filter_cb = receive_filter_cb;
+}
+
+inline void rtos_i2s_restart_cb_set(
+        rtos_i2s_t *ctx,
+        rtos_i2s_restart_cb_t restart_cb,
+        void *restart_app_data)
+{
+    ctx->restart_app_data = restart_app_data;
+    ctx->restart_cb = restart_cb;
 }
 
 /**
